@@ -146,8 +146,7 @@ io.on('connection', function (socket) {
                 io.sockets.emit('viewmessage',{status:1,message:"not good"});
             }
         }).sort({message:-1});
-    // if(req.receiver_id || req.sender_id)
-    // {
+    
     
         
     // }
@@ -229,6 +228,25 @@ io.on('connection', function (socket) {
                 io.sockets.in(req.user_id).emit('allchat',{status:1,message:"some thing went wrong"});
               }
           });
+      });
+      socket.on('allmessage',function(req){
+        user.message.find({chat_id:req.chat_id,$or:[{sender_id:req.user_id},{receiver_id:req.user_id}]},function(err,result)
+        {
+            if(err)
+            {
+                console.log("error",err.message);
+                io.sockets.in(req.user_id).emit('allmessage',{status:1,message:err.message});
+            }
+            else if(result)
+            {
+                console.log("result",result);
+                io.sockets.in(req.user_id).emit('allmessage',{status:1,data:result});
+            }
+            else
+            {
+                io.sockets.in(req.user_id).emit('allmessage',{status:1,message:"some thing wrong..dyan dwo ji"});
+            }
+        });
       });
 });
 
