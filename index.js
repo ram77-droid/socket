@@ -5,41 +5,19 @@ const io = require('socket.io')(server);
 var body_parser = require('body-parser');
 app.use(body_parser.json());
 
-// socket.on('disconnect', function () {
-//     console.log('disconnected'); 
-// }); 
 io.on('connection', function (socket) {
     console.log('connected');   
    
     socket.on('disconnect', function () {
             console.log('disconnected'); 
         }); 
-    socket.on('join', function (req) {
+    socket.on('join', function (req) 
+    {
     socket.join(req.user_id);
     console.log("reqq",req.user_id);
     io.sockets.in(req.user_id).emit("join" , { status: 1 , message: "Sucessfully Joined."});
-    
-        // if(req.user_id)
-        // {
-        //     console.log("user:",req.user_id);
-        //     user.users.findOne({_id:req.user_id},function(err,result){
-        //         if(err)
-        //         {
-        //             return err;
-        //         }
-        //         else if(result)
-        //         {
-        //             console.log("join");
-        //             console.log("reqqq",req.user_id);
-        //             io.sockets.emit('join', { status: 1 , message: "Sucessfully Joined."});
-        //         }
-        //         else
-        //         {
-        //             io.sockets.emit('join', { status: 1 , message:"something went wrong" });
-        //         }
-        //     });
-        //     } 
-        });   
+           
+    });   
 
         socket.on('initialize',function(req){
             console.log("initialize");
