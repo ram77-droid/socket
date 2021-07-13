@@ -153,7 +153,7 @@ io.on('connection', function (socket) {
     // }
       }); 
       socket.on('allchat',function(req){
-          user.chat.find({sender_id:req.user_id},function(err,result){
+          user.chat.find({$or:[{sender_id:req.user_id},{receiver_id:req.user_id}]},function(err,result){
               if(err)
               {
                   console.log("errrr");
