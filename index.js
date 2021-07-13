@@ -4,6 +4,7 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 var body_parser = require('body-parser');
 app.use(body_parser.json());
+var mongoose=require('mongoose');
 
 io.on('connection', function (socket) {
     console.log('connected');   
@@ -93,7 +94,8 @@ io.on('connection', function (socket) {
                         else if(result)
                         {
                             console.log("resulttt",result.message);
-                            io.sockets.emit('sendmessage',{status:1,message:"message sent"});
+                            io.sockets.in(req.sender_id).emit('sendmessage',{status:1,message:"message sent"});
+                            io.sockets.in(req.receiver_id).emit('sendmessage',{status:1,message:"a new message received"});
                             io.sockets.in(req.receiver_id).emit('viewmessage',result.message);
                             io.sockets.in(req.sender_id).emit('viewmessage',result.message);
                         }
@@ -152,82 +154,87 @@ io.on('connection', function (socket) {
     // }
       }); 
       socket.on('allchat',function(req){
-          user.chat.find({$or:[{sender_id:req.user_id},{receiver_id:req.user_id}]},function(err,result){
-              if(err)
-              {
-                  console.log("errrr");
-              }
-              else if(result)
-              {
-                  //console.log("result",result);
-                 // io.sockets.in(req.user_id).emit('allchat',{status:1,data:result});
+        
+                
                   user.chat.aggregate([
-                      {
-                          $lookup:
-                          {
-                            from:"messages",
-                             let:{
-                                 id:"$_id"
+                    {
+                        $match:{
+                            $or:[{sender_id:mongoose.Types.ObjectId(req.user_id)},{receiver_id:mongoose.Types.ObjectId(req.user_id)}]
+                        }
+                    },
+                    {
+                        $lookup:
+                        {
+                          from:"messages",
+                           let:{
+                               id:"$_id"
 
-                             },
-                             pipeline:[
-                                {
-                                    $match:
+                           },
+                           pipeline:[
+                              {
+                                  $match:
+                                  {
+                                    $expr:
                                     {
-                                      $expr:
-                                      {
-                                          $and:[
-                                            { "$eq": [ "$$id", "$chat_id" ] }
-                                          ]
-                                      }
+                                        $and:[
+                                          { "$eq": [ "$$id", "$chat_id" ] }
+                                        ]
                                     }
-                                },
-                                {
-                                    $sort:{created_at:-1}
-                                },
-                                {
-                                    $project:
-                                    {
-                                        sender_id:1,
-                                        receiver_id:1,
-                                        "message":1        
-                                    }
-                                 },
-                                
-                                 {
-                                     $limit:1
-                                 }
-                                 
+                                  }
+                              },
+                              {
+                                  $sort:{created_at:-1}
+                              },
+                              {
+                                  $project:
+                                  {
+                                      sender_id:1,
+                                      receiver_id:1,
+                                      "message":1        
+                                  }
+                               },
+                              
+                               {
+                                   $limit:1
+                               }
+                               
 
-                             ],
-                              as:"lastmessage"
-                          },
-                          
-                      }
-                      
-                      
-                  ],function(err,result){
-                      if(err)
-                      {
-                          io.sockets.in(req.user_id).emit('allchat',{status:1,message:err.message});
-                      }
-                      else if(result)
-                      {
-                          console.log("rrrr",result);
-                        io.sockets.in(req.user_id).emit('allchat',{status:1,data:result});
-                      }
-                      else
-                      {
-                        io.sockets.in(req.user_id).emit('allchat',{status:1,message:"something wrong"});
-                      }
+                           ],
+                            as:"lastmessage"
+                        },
+                        
+                    }                    
+                    
+                ],function(err,result){
+                    if(err)
+                    {
+                        io.sockets.in(req.user_id).emit('allchat',{status:1,message:err.message});
+                    }
+                    else if(result)
+                    {
+                        console.log("rrrr",result);
+                      io.sockets.in(req.user_id).emit('allchat',{status:1,data:result});
+                    }
+                    else
+                    {
+                      io.sockets.in(req.user_id).emit('allchat',{status:1,message:"something wrong"});
+                    }
 
-                  }).sort({created_at:1});
-              }
-              else 
-              {
-                io.sockets.in(req.user_id).emit('allchat',{status:1,message:"some thing went wrong"});
-              }
-          });
+                }).sort({created_at:1});
+
+                // if(result[0].sender_id===req.user_id || result[0].receiver_id===req.user_id)
+                // {
+
+                   
+
+                // }
+                // else
+                // {
+                //     io.sockets.emit('allchat',{message:"kuch toh glt hai"});
+                // }
+                 
+              
+        
       });
       socket.on('allmessage',function(req){
         user.message.find({chat_id:req.chat_id,$or:[{sender_id:req.user_id},{receiver_id:req.user_id}]},function(err,result)
