@@ -1,4 +1,4 @@
-var user= require('../schemas.js');
+var user= require('./schemas.js');
 const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
@@ -254,7 +254,7 @@ io.on('connection', function (socket) {
       });
 });
 
-
-  server.listen(4000, function(){
+const PORT = process.env.PORT || 4000;
+  server.listen(PORT, function(){
     console.log('Server listening on port 4000');
 });
