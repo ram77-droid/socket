@@ -32,10 +32,40 @@ io.on('connection', function (socket) {
                 }
                 else if(result)
                 {
+                    user.users.find({ _id:req.receiver_id},function(err,success){
+                        if(err)
+                        {
+                            io.sockets.in(req.sender_id).emit('initialize',{message:err.message});
+                        }
+                        else if(success)
+                        {
+                         io.sockets.in(req.sender_id).emit('initialize',{data:success});
+                        }
+                        else
+                        {
+                            io.sockets.in(req.sender_id).emit('initialize',{message:"kuch to glt hai"});
+                        }
+                    });
                     io.sockets.emit('initialize', { status: 1 , message:"chat initialized already"});
+                    
                 }
                 else
                 {
+                    user.users.find({ _id:req.receiver_id},function(err,success){
+                        if(err)
+                        {
+                            io.sockets.in(req.sender_id).emit('initialize',{message:err.message});
+                        }
+                        else if(success)
+                        {                       
+                            
+                         io.sockets.in(req.sender_id).emit('initialize',{data:success});
+                        }
+                        else
+                        {
+                            io.sockets.in(req.sender_id).emit('initialize',{message:"kuch to glt hai"});
+                        }
+                    });
                     obj={
                         sender_id:req.sender_id,
                         receiver_id:req.receiver_id  
@@ -52,6 +82,7 @@ io.on('connection', function (socket) {
                             console.log("result:",result);
                             console.log("result agya")
                             io.sockets.emit('initialize', { status: 1 , message:"chat initialized"});
+                           
                         }
                     });
                 }
@@ -255,37 +286,7 @@ io.on('connection', function (socket) {
             }
         });
       });
-
-      socket.on('reinitialize',function(req){
-        user.users.find({ _id: { $in: [ req.sender_id, req.receiver_id ] } },function(err,result){
-            if(err)
-            {
-                io.sockets.in(req.sender_id).emit('reinitialize',{message:err.message});
-            }
-            else if(result)
-            {
-                console.log("result is",result.sender_id);
-                // obj={
-                //     _id:req.sender_id,
-                //     _id:req.receiver_id,
-                //     email:result
-
-                // }
-
-                io.sockets.in(req.sender_id).emit('reinitialize',{data:result});
-            }
-            else
-            {
-                io.sockets.in(req.sender_id).emit('reinitialize',{message:"kuch to glt hai"});
-            }
-        });
-
-        
-
-
-
-        });
-});
+     });
 
 const PORT = process.env.PORT || 4000;
   server.listen(PORT, function(){
