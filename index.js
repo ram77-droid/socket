@@ -15,7 +15,7 @@ io.on('connection', function (socket) {
     socket.on('join', function (req) 
     {
     socket.join(req.user_id);
-    console.log("reqq",req.user_id);
+   // console.log("reqq",req.user_id);
     io.sockets.in(req.user_id).emit("join" , { status: 1 , message: "Sucessfully Joined."});
            
     });   
@@ -255,6 +255,36 @@ io.on('connection', function (socket) {
             }
         });
       });
+
+      socket.on('reinitialize',function(req){
+        user.users.find({ _id: { $in: [ req.sender_id, req.receiver_id ] } },function(err,result){
+            if(err)
+            {
+                io.sockets.in(req.sender_id).emit('reinitialize',{message:err.message});
+            }
+            else if(result)
+            {
+                console.log("result is",result.sender_id);
+                // obj={
+                //     _id:req.sender_id,
+                //     _id:req.receiver_id,
+                //     email:result
+
+                // }
+
+                io.sockets.in(req.sender_id).emit('reinitialize',{data:result});
+            }
+            else
+            {
+                io.sockets.in(req.sender_id).emit('reinitialize',{message:"kuch to glt hai"});
+            }
+        });
+
+        
+
+
+
+        });
 });
 
 const PORT = process.env.PORT || 4000;
