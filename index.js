@@ -18,7 +18,7 @@ io.on('connection', function (socket) {
    // console.log("reqq",req.user_id);
     io.sockets.in(req.user_id).emit("join" , { status: 1 , message: "Sucessfully Joined."});
            
-    });   
+        });   
 
         socket.on('initialize',function(req){
             console.log("initialize");
@@ -183,7 +183,7 @@ io.on('connection', function (socket) {
     
         
     // }
-      }); 
+        }); 
       socket.on('allchat',function(req){
         
                 
@@ -266,7 +266,7 @@ io.on('connection', function (socket) {
                  
               
         
-      });
+        });
       socket.on('allmessage',function(req){
         user.message.find({chat_id:req.chat_id,$or:[{sender_id:req.user_id},{receiver_id:req.user_id}]},function(err,result)
         {
@@ -285,7 +285,7 @@ io.on('connection', function (socket) {
                 io.sockets.in(req.user_id).emit('allmessage',{status:1,message:"some thing wrong..dyan dwo ji"});
             }
         });
-      });
+        });
      });
 
 const PORT = process.env.PORT || 4000;
